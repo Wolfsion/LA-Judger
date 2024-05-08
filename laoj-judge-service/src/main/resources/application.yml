@@ -1,6 +1,6 @@
 spring:
   application:
-    name: laoj-user-service
+    name: laoj-judge-service
   # dev environment
   profiles:
     active: dev
@@ -33,11 +33,18 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.152.1:8848
+  rabbitmq:
+    host: localhost
+    port: 5672
+    password: guest
+    username: guest
+#    password: lavson
+#    username: qop909@rmq
 server:
   address: 0.0.0.0
-  port: 8102
+  port: 8104
   servlet:
-    context-path: /api/user
+    context-path: /api/judge
     # cookie 30 day
     session:
       cookie:
@@ -52,5 +59,8 @@ mybatis-plus:
       logic-delete-field: isDelete # logic delete field name
       logic-delete-value: 1 # deleted: 1
       logic-not-delete-value: 0 # undeleted: 0
+# codesandbox type
+codesandbox:
+  type: example
 knife4j:
   enable: true

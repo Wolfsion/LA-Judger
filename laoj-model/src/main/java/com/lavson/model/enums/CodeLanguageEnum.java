@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * 2024/5/7 - 20:00
  */
-public enum CodeLanguage {
+public enum CodeLanguageEnum {
 
     JAVA("java", "java"),
     CPLUSPLUS("cpp", "cpp"),
@@ -23,7 +23,7 @@ public enum CodeLanguage {
 
     private final String value;
 
-    CodeLanguage(String text, String value) {
+    CodeLanguageEnum(String text, String value) {
         this.text = text;
         this.value = value;
     }
@@ -43,11 +43,11 @@ public enum CodeLanguage {
      * @param value
      * @return
      */
-    public static CodeLanguage getEnumByValue(String value) {
+    public static CodeLanguageEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (CodeLanguage anEnum : CodeLanguage.values()) {
+        for (CodeLanguageEnum anEnum : CodeLanguageEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }

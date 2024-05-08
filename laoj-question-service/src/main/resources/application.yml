@@ -1,6 +1,6 @@
 spring:
   application:
-    name: laoj-user-service
+    name: laoj-question-service
   # dev environment
   profiles:
     active: dev
@@ -35,9 +35,9 @@ spring:
         server-addr: 192.168.152.1:8848
 server:
   address: 0.0.0.0
-  port: 8102
+  port: 8103
   servlet:
-    context-path: /api/user
+    context-path: /api/question
     # cookie 30 day
     session:
       cookie:

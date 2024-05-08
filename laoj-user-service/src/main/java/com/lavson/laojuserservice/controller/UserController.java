@@ -17,6 +17,7 @@ import com.lavson.model.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -127,6 +128,8 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = new User();
+        String encryptPassword = DigestUtils.md5DigestAsHex((UserConstant.SALT + UserConstant.USER_DEFAULT_PASS).getBytes());
+        user.setUserPassword(encryptPassword);
         BeanUtils.copyProperties(userAddRequest, user);
         boolean result = userService.save(user);
         ThrowUtil.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -178,9 +181,9 @@ public class UserController {
      * @param request
      * @return
      */
-    @GetMapping("/get")
+    @GetMapping("/get/{id}")
     @AuthCheck(needRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<User> getUserById(long id, HttpServletRequest request) {
+    public BaseResponse<User> getUserById(@PathVariable long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -196,8 +199,8 @@ public class UserController {
      * @param request
      * @return
      */
-    @GetMapping("/get/vo")
-    public BaseResponse<UserVO> getUserVOById(long id, HttpServletRequest request) {
+    @GetMapping("/get/vo/{id}")
+    public BaseResponse<UserVO> getUserVOById(@PathVariable long id, HttpServletRequest request) {
         BaseResponse<User> response = getUserById(id, request);
         User user = response.getData();
         return ResultUtil.success(userService.getUserVO(user));

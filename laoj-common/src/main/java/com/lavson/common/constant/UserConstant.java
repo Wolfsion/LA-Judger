@@ -13,6 +13,16 @@ public interface UserConstant {
      */
     String USER_LOGIN_STATE = "user_login";
 
+    /**
+     * 用户默认密码
+     */
+    String USER_DEFAULT_PASS = "12345Q1@";
+
+    /**
+     * 加盐
+     */
+    String SALT = "lavson";
+
     //  region 权限
 
     /**
