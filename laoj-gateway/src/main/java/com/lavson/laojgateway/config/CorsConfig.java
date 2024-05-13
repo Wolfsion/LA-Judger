@@ -24,13 +24,12 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedMethod("*");
         config.setAllowCredentials(true);
-
         // todo 实际改为线上真实域名、本地域名
         config.setAllowedOriginPatterns(Arrays.asList("*"));
-
         config.addAllowedHeader("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(new PathPatternParser());
         source.registerCorsConfiguration("/**", config);
         return new CorsWebFilter(source);
     }
 }
+
