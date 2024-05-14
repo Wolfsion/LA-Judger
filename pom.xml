@@ -14,6 +14,7 @@
         <module>laoj-question-service</module>
         <module>laoj-service-client</module>
         <module>laoj-user-service</module>
+        <module>laoj-code-sandbox</module>
     </modules>
     <name>judger</name>
     <description>LA Judger(Mirco Service)</description>
