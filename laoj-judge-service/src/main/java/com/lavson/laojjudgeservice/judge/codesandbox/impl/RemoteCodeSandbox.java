@@ -2,6 +2,7 @@ package com.lavson.laojjudgeservice.judge.codesandbox.impl;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
+import com.lavson.common.constant.SandBoxConstant;
 import com.lavson.common.exception.BusinessException;
 import com.lavson.common.norm.ErrorCode;
 import com.lavson.laojjudgeservice.judge.codesandbox.CodeSandbox;
@@ -19,9 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 public class RemoteCodeSandbox implements CodeSandbox {
 
     // 定义鉴权请求头和密钥
-    private static final String AUTH_REQUEST_HEADER = "auth";
+    private static final String AUTH_REQUEST_HEADER = SandBoxConstant.AUTH_REQUEST_HEADER;
 
-    private static final String AUTH_REQUEST_SECRET = "secretKey";
+    private static final String AUTH_REQUEST_SECRET = SandBoxConstant.AUTH_REQUEST_SECRET;
 
 
     @Override

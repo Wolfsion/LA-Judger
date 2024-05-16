@@ -45,7 +45,7 @@ public class ProcessUtil {
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
                     outputStrList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(StringUtils.join(outputStrList, "\n"));
+                executeMessage.setOutput(StringUtils.join(outputStrList, "\n"));
             } else {
                 // 异常退出
                 System.out.println(opName + "失败，错误码： " + exitValue);
@@ -57,7 +57,7 @@ public class ProcessUtil {
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
                     outputStrList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(StringUtils.join(outputStrList, "\n"));
+                executeMessage.setOutput(StringUtils.join(outputStrList, "\n"));
 
                 // 分批获取进程的错误输出
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
@@ -107,7 +107,7 @@ public class ProcessUtil {
             while ((compileOutputLine = bufferedReader.readLine()) != null) {
                 compileOutputStringBuilder.append(compileOutputLine);
             }
-            executeMessage.setMessage(compileOutputStringBuilder.toString());
+            executeMessage.setOutput(compileOutputStringBuilder.toString());
             // 记得资源的释放，否则会卡死
             outputStreamWriter.close();
             outputStream.close();

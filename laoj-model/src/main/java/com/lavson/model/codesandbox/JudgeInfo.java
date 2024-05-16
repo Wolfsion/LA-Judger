@@ -1,5 +1,6 @@
 package com.lavson.model.codesandbox;
 
+import com.lavson.model.enums.JudgeResultEnum;
 import lombok.Data;
 
 /**
@@ -13,17 +14,17 @@ import lombok.Data;
 public class JudgeInfo {
 
     /**
-     * 内存限制（KB）
+     * 使用内存（KB）
      */
     private Long memory;
 
     /**
-     * 时间限制（ms）
+     * 执行时间（ms）
      */
     private Long time;
 
     /**
      * 程序执行信息
      */
-    private String message;
+    private JudgeResultEnum judge;
 }

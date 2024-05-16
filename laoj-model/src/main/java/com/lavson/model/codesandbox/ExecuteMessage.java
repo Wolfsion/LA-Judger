@@ -1,5 +1,6 @@
 package com.lavson.model.codesandbox;
 
+import com.lavson.model.enums.JudgeResultEnum;
 import lombok.Data;
 
 /**
@@ -14,11 +15,13 @@ public class ExecuteMessage {
 
     private Integer exitValue;
 
-    private String message;
+    private String output;
 
     private String errorMessage;
 
     private Long time;
 
     private Long memory;
+
+    private JudgeResultEnum judge;
 }

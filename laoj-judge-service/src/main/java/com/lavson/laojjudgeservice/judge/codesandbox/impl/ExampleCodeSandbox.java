@@ -8,6 +8,7 @@ import com.lavson.model.enums.JudgeResultEnum;
 import com.lavson.model.enums.JudgeStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,10 +28,10 @@ public class ExampleCodeSandbox implements CodeSandbox {
         executeCodeResponse.setMessage("测试执行成功");
         executeCodeResponse.setStatus(JudgeStatusEnum.SUCCEED.getValue());
         JudgeInfo judgeInfo = new JudgeInfo();
-        judgeInfo.setMessage(JudgeResultEnum.ACCEPTED.getText());
+        judgeInfo.setJudge(JudgeResultEnum.ACCEPTED);
         judgeInfo.setMemory(100L);
         judgeInfo.setTime(100L);
-        executeCodeResponse.setJudgeInfo(judgeInfo);
+        executeCodeResponse.setJudgeInfos(Collections.singletonList(judgeInfo));
         return executeCodeResponse;
     }
 }

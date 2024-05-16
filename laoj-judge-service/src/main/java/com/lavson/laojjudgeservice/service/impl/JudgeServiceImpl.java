@@ -86,7 +86,7 @@ public class JudgeServiceImpl implements JudgeService {
         List<String> outputList = executeCodeResponse.getOutputList();
         // 5）根据沙箱的执行结果，设置题目的判题状态和信息
         JudgeContext judgeContext = new JudgeContext();
-        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setJudgeInfos(executeCodeResponse.getJudgeInfos());
         judgeContext.setInputList(inputList);
         judgeContext.setOutputList(outputList);
         judgeContext.setJudgeCaseList(judgeCaseList);

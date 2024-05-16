@@ -1,9 +1,11 @@
 package com.lavson.laojcodesandbox.controller;
 
+import com.lavson.common.constant.SandBoxConstant;
 import com.lavson.laojcodesandbox.service.CodeBoxManager;
 import com.lavson.laojcodesandbox.service.CodeSandbox;
 import com.lavson.model.codesandbox.ExecuteCodeRequest;
 import com.lavson.model.codesandbox.ExecuteCodeResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +27,9 @@ import java.io.IOException;
 public class MainController {
 
     // 定义鉴权请求头和密钥
-    private static final String AUTH_REQUEST_HEADER = "auth";
+    private static final String AUTH_REQUEST_HEADER = SandBoxConstant.AUTH_REQUEST_HEADER;
 
-    private static final String AUTH_REQUEST_SECRET = "secretKey";
+    private static final String AUTH_REQUEST_SECRET = SandBoxConstant.AUTH_REQUEST_SECRET;
 
     @Resource
     private CodeBoxManager boxManager;

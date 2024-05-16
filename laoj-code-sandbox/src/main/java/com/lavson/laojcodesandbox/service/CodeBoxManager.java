@@ -21,8 +21,6 @@ import java.io.IOException;
 
 @Service
 public class CodeBoxManager {
-    @Resource
-    private CodeSandbox codeSandbox;
 
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) throws IOException {
         if (CodeLanguageEnum.JAVA.getText().equals(executeCodeRequest.getLanguage())) {

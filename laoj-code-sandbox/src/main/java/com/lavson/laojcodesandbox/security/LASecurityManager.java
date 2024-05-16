@@ -1,5 +1,8 @@
 package com.lavson.laojcodesandbox.security;
 
+import com.lavson.common.constant.SandBoxConstant;
+import com.lavson.laojcodesandbox.service.CodeSandbox;
+
 import java.security.Permission;
 
 /**
@@ -18,38 +21,37 @@ public class LASecurityManager extends SecurityManager {
 //        super.checkPermission(perm);
     }
 
-    // 检测程序是否可执行文件
+    // 禁止执行文件
     @Override
     public void checkExec(String cmd) {
         throw new SecurityException("checkExec 权限异常：" + cmd);
     }
 
     // 检测程序是否允许读文件
-
     @Override
     public void checkRead(String file) {
         System.out.println(file);
-        if (file.contains("C:\\code\\yuoj-code-sandbox")) {
+        if (file.contains(SandBoxConstant.READ_SUB_DIR)) {
             return;
         }
-//        throw new SecurityException("checkRead 权限异常：" + file);
+        throw new SecurityException("checkRead 权限异常：" + file);
     }
 
-    // 检测程序是否允许写文件
+    // 禁止写文件
     @Override
     public void checkWrite(String file) {
-//        throw new SecurityException("checkWrite 权限异常：" + file);
+        throw new SecurityException("checkWrite 权限异常：" + file);
     }
 
-    // 检测程序是否允许删除文件
+    // 禁止删除文件
     @Override
     public void checkDelete(String file) {
-//        throw new SecurityException("checkDelete 权限异常：" + file);
+        throw new SecurityException("checkDelete 权限异常：" + file);
     }
 
-    // 检测程序是否允许连接网络
+    // 禁止连接网络
     @Override
     public void checkConnect(String host, int port) {
-//        throw new SecurityException("checkConnect 权限异常：" + host + ":" + port);
+        throw new SecurityException("checkConnect 权限异常：" + host + ":" + port);
     }
 }

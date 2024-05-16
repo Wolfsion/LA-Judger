@@ -1,18 +1,23 @@
 package com.lavson.laojcodesandbox.service.java;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.lavson.common.constant.SandBoxConstant;
 import com.lavson.laojcodesandbox.service.CodeSandbox;
 import com.lavson.laojcodesandbox.utils.ProcessUtil;
 import com.lavson.model.codesandbox.ExecuteCodeRequest;
 import com.lavson.model.codesandbox.ExecuteCodeResponse;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.codesandbox.JudgeInfo;
+import com.lavson.model.entity.JudgeConfig;
+import com.lavson.model.enums.JudgeResultEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,17 +31,15 @@ import java.util.UUID;
 @Slf4j
 public abstract class JavaCodeBoxTemplate implements CodeSandbox {
 
-    private static final String GLOBAL_CODE_DIR_NAME = "tmpCode";
+    private static final String GLOBAL_CODE_DIR_NAME = SandBoxConstant.GLOBAL_CODE_DIR_NAME;
 
-    private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
-
-    private static final long TIME_OUT = 5000L;
+    private static final String GLOBAL_JAVA_CLASS_NAME = SandBoxConstant.GLOBAL_JAVA_CLASS_NAME;
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
-        String language = executeCodeRequest.getLanguage();
+        JudgeConfig config = executeCodeRequest.getConfig();
 
 //        1. 把用户的代码保存为文件
         File userCodeFile = saveCodeToFile(code);
@@ -46,7 +49,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         System.out.println(compileFileExecuteMessage);
 
         // 3. 执行代码，得到输出结果
-        List<ExecuteMessage> executeMessageList = runFile(userCodeFile, inputList);
+        List<ExecuteMessage> executeMessageList = runFile(userCodeFile, inputList, config);
 
 //        4. 收集整理输出结果
         ExecuteCodeResponse outputResponse = getOutputResponse(executeMessageList);
@@ -76,8 +79,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         // 把用户的代码隔离存放
         String userCodeParentPath = globalCodePathName + File.separator + UUID.randomUUID();
         String userCodePath = userCodeParentPath + File.separator + GLOBAL_JAVA_CLASS_NAME;
-        File userCodeFile = FileUtil.writeString(code, userCodePath, StandardCharsets.UTF_8);
-        return userCodeFile;
+        return FileUtil.writeString(code, userCodePath, StandardCharsets.UTF_8);
     }
 
     /**
@@ -106,7 +108,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
      * @param inputList
      * @return
      */
-    abstract public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList);
+    abstract public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList, JudgeConfig config);
 
     /**
      * 4、获取输出结果
@@ -116,8 +118,8 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
     public ExecuteCodeResponse getOutputResponse(List<ExecuteMessage> executeMessageList) {
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
         List<String> outputList = new ArrayList<>();
-        // 取用时最大值，便于判断是否超时
-        long maxTime = 0;
+        ArrayList<JudgeInfo> jis = new ArrayList<>();
+
         for (ExecuteMessage executeMessage : executeMessageList) {
             String errorMessage = executeMessage.getErrorMessage();
             if (StrUtil.isNotBlank(errorMessage)) {
@@ -126,22 +128,26 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
                 executeCodeResponse.setStatus(3);
                 break;
             }
-            outputList.add(executeMessage.getMessage());
-            Long time = executeMessage.getTime();
-            if (time != null) {
-                maxTime = Math.max(maxTime, time);
+            outputList.add(executeMessage.getOutput());
+
+            JudgeInfo judgeInfo = new JudgeInfo();
+            judgeInfo.setTime(executeMessage.getTime());
+            judgeInfo.setMemory(executeMessage.getMemory());
+
+            if (ObjectUtil.isNotNull(executeMessage.getJudge())) {
+                judgeInfo.setJudge(executeMessage.getJudge());
+            } else {
+                judgeInfo.setJudge(JudgeResultEnum.JUDGING_WAITING);
             }
+            jis.add(judgeInfo);
         }
         // 正常运行完成
         if (outputList.size() == executeMessageList.size()) {
             executeCodeResponse.setStatus(1);
         }
+
         executeCodeResponse.setOutputList(outputList);
-        JudgeInfo judgeInfo = new JudgeInfo();
-        judgeInfo.setTime(maxTime);
-        // 要借助第三方库来获取内存占用，非常麻烦，此处不做实现
-//        judgeInfo.setMemory();
-        executeCodeResponse.setJudgeInfo(judgeInfo);
+        executeCodeResponse.setJudgeInfos(jis);
         return executeCodeResponse;
     }
 
@@ -172,7 +178,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         executeCodeResponse.setMessage(e.getMessage());
         // 表示代码沙箱错误
         executeCodeResponse.setStatus(2);
-        executeCodeResponse.setJudgeInfo(new JudgeInfo());
+        executeCodeResponse.setJudgeInfos(Collections.singletonList(new JudgeInfo()));
         return executeCodeResponse;
     }
 }

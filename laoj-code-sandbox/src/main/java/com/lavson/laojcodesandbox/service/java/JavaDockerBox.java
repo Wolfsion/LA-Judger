@@ -1,6 +1,7 @@
 package com.lavson.laojcodesandbox.service.java;
 
 import com.lavson.model.codesandbox.ExecuteMessage;
+import com.lavson.model.entity.JudgeConfig;
 
 import java.io.File;
 import java.util.List;
@@ -13,8 +14,9 @@ import java.util.List;
  * 2024/5/14 - 20:31
  */
 public class JavaDockerBox extends JavaCodeBoxTemplate{
+
     @Override
-    public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList) {
+    public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList, JudgeConfig config) {
         return null;
     }
 }

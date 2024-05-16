@@ -20,12 +20,28 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecuteCodeRequest {
-
+    /**
+     * 输入测例
+     */
     private List<String> inputList;
 
+    /**
+     * 提交代码
+     */
     private String code;
 
+    /**
+     * 编程语言
+     */
     private String language;
 
+    /**
+     * 题目配置
+     */
     private JudgeConfig config;
+
+    /**
+     * 当前要执行的测例
+     */
+    private Integer offset;
 }

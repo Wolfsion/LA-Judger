@@ -19,7 +19,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecuteCodeResponse {
-
+    /**
+     * 执行输出结果
+     */
     private List<String> outputList;
 
     /**
@@ -35,5 +37,5 @@ public class ExecuteCodeResponse {
     /**
      * 判题信息
      */
-    private JudgeInfo judgeInfo;
+    private List<JudgeInfo> judgeInfos;
 }
