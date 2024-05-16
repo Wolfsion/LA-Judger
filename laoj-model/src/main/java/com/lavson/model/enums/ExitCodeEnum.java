@@ -7,24 +7,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 用户权限角色枚举
+ * todo
  *
  * @author LA
  * @version 1.0
- * 2024/5/7 - 20:02
+ * 2024/5/16 - 17:46
  */
-public enum UserRoleEnum {
+public enum ExitCodeEnum {
 
-    USER("用户", "user"),
-    VIP_USER("VIP用户", "vip_user"),
-    ADMIN("管理员", "admin"),
-    BAN("被封号", "ban");
+    SUCCESS("Success", 0),
+    UNKNOWN_ERROR("Unknown error occurred", 1),
+    INVALID_ARGUMENTS("Invalid command line arguments", 2),
+    SANDBOX_ERROR("Code Sandbox error", 3);
+
 
     private final String text;
 
-    private final String value;
+    private final Integer value;
 
-    UserRoleEnum(String text, String value) {
+    ExitCodeEnum(String text, Integer value) {
         this.text = text;
         this.value = value;
     }
@@ -34,8 +35,8 @@ public enum UserRoleEnum {
      *
      * @return
      */
-    public static List<String> getValues() {
-        return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
+    public static List<Integer> getValues() {
+        return Arrays.stream(ExitCodeEnum.values()).map(item -> item.value).collect(Collectors.toList());
     }
 
     /**
@@ -44,11 +45,11 @@ public enum UserRoleEnum {
      * @param value
      * @return
      */
-    public static UserRoleEnum getEnumByValue(String value) {
+    public static ExitCodeEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (UserRoleEnum anEnum : UserRoleEnum.values()) {
+        for (ExitCodeEnum anEnum : ExitCodeEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }
@@ -56,7 +57,7 @@ public enum UserRoleEnum {
         return null;
     }
 
-    public String getValue() {
+    public Integer getValue() {
         return value;
     }
 
@@ -64,3 +65,4 @@ public enum UserRoleEnum {
         return text;
     }
 }
+

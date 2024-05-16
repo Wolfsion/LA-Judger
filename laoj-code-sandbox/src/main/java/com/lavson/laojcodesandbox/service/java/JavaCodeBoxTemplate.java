@@ -11,15 +11,13 @@ import com.lavson.model.codesandbox.ExecuteCodeResponse;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.codesandbox.JudgeInfo;
 import com.lavson.model.entity.JudgeConfig;
+import com.lavson.model.enums.ExitCodeEnum;
 import com.lavson.model.enums.JudgeResultEnum;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * todo
@@ -92,7 +90,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         try {
             Process compileProcess = Runtime.getRuntime().exec(compileCmd);
             ExecuteMessage executeMessage = ProcessUtil.runProcessAndGetMessage(compileProcess, "编译");
-            if (executeMessage.getExitValue() != 0) {
+            if (!Objects.equals(executeMessage.getExitValue(), ExitCodeEnum.SUCCESS.getValue())) {
                 throw new RuntimeException("编译错误");
             }
             return executeMessage;
@@ -125,7 +123,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
             if (StrUtil.isNotBlank(errorMessage)) {
                 executeCodeResponse.setMessage(errorMessage);
                 // 用户提交的代码执行中存在错误
-                executeCodeResponse.setStatus(3);
+                executeCodeResponse.setStatus(ExitCodeEnum.UNKNOWN_ERROR.getValue());
                 break;
             }
             outputList.add(executeMessage.getOutput());
@@ -177,7 +175,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         executeCodeResponse.setOutputList(new ArrayList<>());
         executeCodeResponse.setMessage(e.getMessage());
         // 表示代码沙箱错误
-        executeCodeResponse.setStatus(2);
+        executeCodeResponse.setStatus(ExitCodeEnum.SANDBOX_ERROR.getValue());
         executeCodeResponse.setJudgeInfos(Collections.singletonList(new JudgeInfo()));
         return executeCodeResponse;
     }

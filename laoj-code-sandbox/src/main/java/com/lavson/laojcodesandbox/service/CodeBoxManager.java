@@ -22,7 +22,7 @@ import java.io.IOException;
 @Service
 public class CodeBoxManager {
 
-    public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) throws IOException {
+    public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         if (CodeLanguageEnum.JAVA.getText().equals(executeCodeRequest.getLanguage())) {
             return new JavaDockerBox().executeCode(executeCodeRequest);
         } else {

@@ -31,7 +31,7 @@ public class ExecuteCodeRequest {
     private String code;
 
     /**
-     * 编程语言
+     * 编程语言，必须为CodeLanguageEnum.value
      */
     private String language;
 
@@ -41,7 +41,7 @@ public class ExecuteCodeRequest {
     private JudgeConfig config;
 
     /**
-     * 当前要执行的测例
+     * 当前要执行的测例开始索引
      */
     private Integer offset;
 }

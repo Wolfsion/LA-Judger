@@ -25,12 +25,12 @@ public class ExecuteCodeResponse {
     private List<String> outputList;
 
     /**
-     * 接口信息
+     * 接口信息，第一次错误执行信息
      */
     private String message;
 
     /**
-     * 执行状态
+     * 执行状态，所有测例执行状态，必须为JudgeStatusEnum.value
      */
     private Integer status;
 
