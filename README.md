@@ -8,3 +8,6 @@
 
 ## 调试文档
 http://localhost:8101/doc.html
+
+## 使用说明
+Docker Engine开启远程服务，默认为: localhost:2375

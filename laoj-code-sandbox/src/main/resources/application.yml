@@ -1,2 +1,4 @@
 server:
   port: 8109
+docker:
+  url: localhost:2375
