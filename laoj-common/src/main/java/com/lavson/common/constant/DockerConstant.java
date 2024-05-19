@@ -13,9 +13,10 @@ public interface DockerConstant {
     Long CPU_COUNT = 1L;
     String DOCKER_MOUNT_DIR = "/app";
 
-    String[] JAVA_EXECUTE = new String[]{"java", "-cp", DOCKER_MOUNT_DIR, "Main", "--read-only"};
+    String[] JAVA_EXECUTE = new String[]{"java", "-Xmx128m", "-cp", DOCKER_MOUNT_DIR, "Main", "--read-only", "<"};
 
     String DOCKER_TCP = "tcp://";
 
-    String[] JAVA_TEST_EXECUTE = new String[]{"echo", "hello"};
+    String[] TEST_EXECUTE = new String[]{"echo", "hello"};
+    String[] TEST_LONG_EXECUTE = new String[]{"sleep", "2"};
 }

@@ -27,11 +27,11 @@ class JavaDockerBoxTest {
     public void testRunFile() {
         JavaDockerBox javaDockerBox = new JavaDockerBox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
-        executeCodeRequest.setInputList(Arrays.asList("1 2", "1 3"));
+        executeCodeRequest.setInputList(Arrays.asList("1790020640590295042_1.in", "1790020640590295042_2.in"));
         String code = ResourceUtil.readStr("testCode/java/Main.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setLanguage("java");
-        executeCodeRequest.setConfig(new JudgeConfig(2000L, SandBoxConstant.DEFAULT_MEMORY_LIMIT, 0L));
+        executeCodeRequest.setConfig(new JudgeConfig(2L, SandBoxConstant.DEFAULT_MEMORY_LIMIT, 0L));
         ExecuteCodeResponse executeCodeResponse = javaDockerBox.executeCode(executeCodeRequest);
         System.out.println(executeCodeResponse);
     }
