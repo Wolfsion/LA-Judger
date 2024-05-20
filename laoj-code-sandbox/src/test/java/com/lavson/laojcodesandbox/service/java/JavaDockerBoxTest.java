@@ -27,7 +27,8 @@ class JavaDockerBoxTest {
     public void testRunFile() {
         JavaDockerBox javaDockerBox = new JavaDockerBox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
-        executeCodeRequest.setInputList(Arrays.asList("1790020640590295042_1.in", "1790020640590295042_2.in"));
+        executeCodeRequest.setInputList(Arrays.asList("/questionIO/1790020640590295042/1.in",
+                "/questionIO/1790020640590295042/2.in"));
         String code = ResourceUtil.readStr("testCode/java/Main.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setLanguage("java");

@@ -1,5 +1,7 @@
 package com.lavson.common.constant;
 
+import java.io.File;
+
 /**
  * todo
  *
@@ -12,11 +14,27 @@ public interface DockerConstant {
     Long MEMORY_SWAP = 0L;
     Long CPU_COUNT = 1L;
     String DOCKER_MOUNT_DIR = "/app";
+    String DOCKER_MOUNT_IO_DIR = "/questionIO";
+    String QUESTION_IS_DIR = System.getProperty("user.dir") + File.separator + "/questionIO";
 
-    String[] JAVA_EXECUTE = new String[]{"java", "-Xmx128m", "-cp", DOCKER_MOUNT_DIR, "Main", "--read-only", "<"};
+    // "--read-only"
+    String[] JAVA_EXECUTE = new String[]{"java", "-Xmx128m", "-cp", DOCKER_MOUNT_DIR, "Main", "<"};
 
     String DOCKER_TCP = "tcp://";
 
-    String[] TEST_EXECUTE = new String[]{"echo", "hello"};
+    String[] TEST_EXECUTE = new String[]{"echo"};
     String[] TEST_LONG_EXECUTE = new String[]{"sleep", "2"};
+
+//    String[] REF_CMD = new String[] {
+//            "sh",
+//            "-c",
+//            "echo '"
+//                    + config.getCode()
+//                    + "' > Main.java "
+//                    + "&& echo '"
+//                    + config.getInput()
+//                    + "' > input.in "
+//                    + "&& javac Main.java"
+//                    + " && /usr/bin/time -f \"%U:%X\" -o /home/consume.out java Main < input.in"
+//    };
 }

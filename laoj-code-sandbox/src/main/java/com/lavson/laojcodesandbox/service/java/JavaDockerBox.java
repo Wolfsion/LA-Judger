@@ -50,11 +50,13 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
         hostConfig.withMemorySwap(DockerConstant.MEMORY_SWAP);
         hostConfig.withCpuCount(DockerConstant.CPU_COUNT);
         //hostConfig.withSecurityOpts(Arrays.asList("seccomp=安全管理配置字符串"));
-        hostConfig.setBinds(new Bind(userCodeParentPath, new Volume(DockerConstant.DOCKER_MOUNT_DIR)));
+
+        hostConfig.setBinds(new Bind(userCodeParentPath, new Volume(DockerConstant.DOCKER_MOUNT_DIR))
+        ,new Bind(DockerConstant.QUESTION_IS_DIR, new Volume(DockerConstant.DOCKER_MOUNT_IO_DIR)));
 
         CreateContainerResponse createContainerResponse = containerCmd
                 .withHostConfig(hostConfig)
-                .withNetworkDisabled(true)
+//                .withNetworkDisabled(false)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
                 .withAttachStdout(true)
@@ -74,15 +76,20 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
 
         for (String input : inputList) {
             ExecuteMessage executeMessage = new ExecuteMessage();
-            String[] cmdArray = ArrayUtil.append(DockerConstant.JAVA_EXECUTE, input);
+            int lastSlashIndex = input.lastIndexOf('/');
+            String file = input.substring(lastSlashIndex+1).replace("in", "out");
+            String output = DockerConstant.DOCKER_MOUNT_DIR + "/" + file;
+            String[] command = ArrayUtil.append(DockerConstant.JAVA_EXECUTE, input);
+            //String[] command = ArrayUtil.append(DockerConstant.TEST_EXECUTE, input);
 
             try {
 
                 ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
-                        .withCmd(DockerConstant.TEST_LONG_EXECUTE)
-                        .withAttachStderr(true)
                         .withAttachStdin(true)
                         .withAttachStdout(true)
+                        .withAttachStderr(true)
+//                        .withTty(true)
+                        .withCmd(command)
                         .exec();
                 log.info("创建执行命令：" + execCreateCmdResponse);
 
@@ -90,6 +97,10 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 long startTime = System.nanoTime();
 
                 FrameResultCallback callback = new FrameResultCallback();
+//                dockerClient.execStartCmd(execCreateCmdResponse.getId())
+//                        .exec(callback)
+//                        .awaitCompletion();
+
                 boolean finishedInTime = dockerClient.execStartCmd(execCreateCmdResponse.getId())
                         .exec(callback)
                         .awaitCompletion(timeLimit, TimeUnit.SECONDS);
@@ -106,9 +117,9 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
                 executeMessage.setTime(executionTimeMillis);
 
-                // 获取容器退出状态
-                Long exitCode = dockerClient.inspectContainerCmd(containerId).exec().getState().getExitCodeLong();
-                log.info("容器退出状态码: " + exitCode);
+//                // 获取容器退出状态
+//                Long exitCode = dockerClient.inspectContainerCmd(containerId).exec().getState().getExitCodeLong();
+//                log.info("容器退出状态码: " + exitCode);
 
             } catch (InterruptedException e) {
                 log.info("容器运行时，超时打断任务异常");
@@ -142,26 +153,12 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
             if (frame.getStreamType() == StreamType.STDOUT || frame.getStreamType() == StreamType.STDERR) {
                 String line = new String(frame.getPayload()).trim();
                 outputLines.add(line);
-                System.out.println((frame.getStreamType() == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
+                log.info((frame.getStreamType() == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
             }
         }
 
         public String getOutputLines() {
             return Arrays.toString(outputLines.toArray(new String[0]));
-        }
-    }
-
-    static class StatisticsCallback extends ResultCallbackTemplate<StatisticsCallback, Statistics> {
-        private Statistics stats;
-
-        @Override
-        public void onNext(Statistics stats) {
-            this.stats = stats;
-        }
-
-        public Statistics awaitStats() throws InterruptedException {
-            awaitCompletion();
-            return stats;
         }
     }
 }

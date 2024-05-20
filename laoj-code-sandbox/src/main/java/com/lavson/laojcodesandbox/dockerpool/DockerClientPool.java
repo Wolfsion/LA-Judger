@@ -35,7 +35,7 @@ public class DockerClientPool {
     static public DockerClient dockerClient() {
         // 创建并配置 DockerClient 对象
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost(DockerConstant.DOCKER_TCP +dockerUrl).build();
+                .withDockerHost(DockerConstant.DOCKER_TCP + dockerUrl).build();
         ApacheDockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
                 .dockerHost(config.getDockerHost())
                 .sslConfig(config.getSSLConfig())
