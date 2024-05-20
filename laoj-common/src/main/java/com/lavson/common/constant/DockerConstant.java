@@ -18,12 +18,12 @@ public interface DockerConstant {
     String QUESTION_IS_DIR = System.getProperty("user.dir") + File.separator + "/questionIO";
 
     // "--read-only"
-    String[] JAVA_EXECUTE = new String[]{"java", "-Xmx128m", "-cp", DOCKER_MOUNT_DIR, "Main", "<"};
+    String[] JAVA_EXECUTE = new String[]{"sh", "-c", "java -Xmx128m -cp /app Main"};
 
     String DOCKER_TCP = "tcp://";
 
     String[] TEST_EXECUTE = new String[]{"echo"};
-    String[] TEST_LONG_EXECUTE = new String[]{"sleep", "2"};
+    String[] TEST_LONG_EXECUTE = new String[]{"sh", "-c", "echo hello && sleep 1"};
 
 //    String[] REF_CMD = new String[] {
 //            "sh",

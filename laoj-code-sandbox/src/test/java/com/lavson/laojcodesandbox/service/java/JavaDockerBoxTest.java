@@ -24,11 +24,24 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class JavaDockerBoxTest {
     @Test
-    public void testRunFile() {
+    public void testRunWithFile() {
         JavaDockerBox javaDockerBox = new JavaDockerBox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
         executeCodeRequest.setInputList(Arrays.asList("/questionIO/1790020640590295042/1.in",
                 "/questionIO/1790020640590295042/2.in"));
+        String code = ResourceUtil.readStr("testCode/java/Main.java", StandardCharsets.UTF_8);
+        executeCodeRequest.setCode(code);
+        executeCodeRequest.setLanguage("java");
+        executeCodeRequest.setConfig(new JudgeConfig(2L, SandBoxConstant.DEFAULT_MEMORY_LIMIT, 0L));
+        ExecuteCodeResponse executeCodeResponse = javaDockerBox.executeCode(executeCodeRequest);
+        System.out.println(executeCodeResponse);
+    }
+
+    @Test
+    public void testRunWithStream() {
+        JavaDockerBox javaDockerBox = new JavaDockerBox();
+        ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
+        executeCodeRequest.setInputList(Arrays.asList("1 2\n", "100 200\n"));
         String code = ResourceUtil.readStr("testCode/java/Main.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setLanguage("java");

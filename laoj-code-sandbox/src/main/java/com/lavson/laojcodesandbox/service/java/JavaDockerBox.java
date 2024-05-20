@@ -76,14 +76,14 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
 
         for (String input : inputList) {
             ExecuteMessage executeMessage = new ExecuteMessage();
-            int lastSlashIndex = input.lastIndexOf('/');
-            String file = input.substring(lastSlashIndex+1).replace("in", "out");
-            String output = DockerConstant.DOCKER_MOUNT_DIR + "/" + file;
-            String[] command = ArrayUtil.append(DockerConstant.JAVA_EXECUTE, input);
-            //String[] command = ArrayUtil.append(DockerConstant.TEST_EXECUTE, input);
 
+//            // 本地文件重定向方式
+//            String[] command = ArrayUtil.clone(DockerConstant.JAVA_EXECUTE);
+//            command[command.length-1] = command[command.length-1] + input;
+
+            InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+            String[] command = DockerConstant.JAVA_EXECUTE;
             try {
-
                 ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
                         .withAttachStdin(true)
                         .withAttachStdout(true)
@@ -97,11 +97,9 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 long startTime = System.nanoTime();
 
                 FrameResultCallback callback = new FrameResultCallback();
-//                dockerClient.execStartCmd(execCreateCmdResponse.getId())
-//                        .exec(callback)
-//                        .awaitCompletion();
 
                 boolean finishedInTime = dockerClient.execStartCmd(execCreateCmdResponse.getId())
+                        .withStdIn(inputStream)
                         .exec(callback)
                         .awaitCompletion(timeLimit, TimeUnit.SECONDS);
 
@@ -116,16 +114,15 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 long endTime = System.nanoTime();
                 long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
                 executeMessage.setTime(executionTimeMillis);
-
+                inputStream.close();
 //                // 获取容器退出状态
 //                Long exitCode = dockerClient.inspectContainerCmd(containerId).exec().getState().getExitCodeLong();
 //                log.info("容器退出状态码: " + exitCode);
 
-            } catch (InterruptedException e) {
-                log.info("容器运行时，超时打断任务异常");
+            } catch (InterruptedException | IOException e) {
+                log.info("容器运行时，超时打断任务异常或输入异常");
                 throw new RuntimeException(e);
             }
-
             executeMessageList.add(executeMessage);
         }
 
