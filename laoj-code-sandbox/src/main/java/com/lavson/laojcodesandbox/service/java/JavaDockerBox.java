@@ -1,11 +1,13 @@
 package com.lavson.laojcodesandbox.service.java;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.lavson.common.constant.DockerConstant;
+import com.lavson.common.constant.SandBoxConstant;
 import com.lavson.laojcodesandbox.dockerpool.DockerClientPool;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.entity.JudgeConfig;
@@ -18,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * todo
@@ -29,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class JavaDockerBox extends JavaCodeBoxTemplate{
 
+    static final Pattern pattern = Pattern.compile(DockerConstant.TIME_MEMORY_REGEX);
     /**
      * 3、创建容器，把文件复制到容器内
      * @param userCodeFile
@@ -82,7 +87,7 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
 //            command[command.length-1] = command[command.length-1] + input;
 
             InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-            String[] command = DockerConstant.JAVA_EXECUTE;
+            String[] command = DockerConstant.TIME_MEMORY_JAVA_EXECUTE;
             try {
                 ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
                         .withAttachStdin(true)
@@ -115,6 +120,11 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
                 executeMessage.setTime(executionTimeMillis);
                 inputStream.close();
+
+                Long[] timeAndMemory = parseTimeAndMemory(callback.getTimeAndMemory());
+                executeMessage.setTime(timeAndMemory[DockerConstant.INDEX_TIME]);
+                executeMessage.setMemory(timeAndMemory[DockerConstant.INDEX_MEMORY]);
+
 //                // 获取容器退出状态
 //                Long exitCode = dockerClient.inspectContainerCmd(containerId).exec().getState().getExitCodeLong();
 //                log.info("容器退出状态码: " + exitCode);
@@ -142,20 +152,48 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
         return executeMessageList;
     }
 
+    static Long[] parseTimeAndMemory(String line) {
+        if (StrUtil.isBlank(line)) {
+            log.error("An invalid String that must not be empty");
+            return new Long[]{0L, 0L};
+        }
+        Matcher matcher = pattern.matcher(line);
+        Long[] rets = new Long[DockerConstant.METRIC_LEN];
+        if (matcher.find()) {
+            rets[DockerConstant.INDEX_TIME] = (long)(Double.parseDouble(matcher.group(1)) * 1000L);
+            rets[DockerConstant.INDEX_MEMORY] = Long.parseLong(matcher.group(2));
+        } else {
+            rets[DockerConstant.INDEX_TIME] = 0L;
+            rets[DockerConstant.INDEX_MEMORY] = 0L;
+        }
+        return rets;
+    }
+
     static class FrameResultCallback extends ResultCallbackTemplate<FrameResultCallback, Frame> {
         private final List<String> outputLines = new ArrayList<>();
+        private String timeAndMemory = "";
 
         @Override
         public void onNext(Frame frame) {
             if (frame.getStreamType() == StreamType.STDOUT || frame.getStreamType() == StreamType.STDERR) {
                 String line = new String(frame.getPayload()).trim();
-                outputLines.add(line);
-                log.info((frame.getStreamType() == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
+
+                if (line.contains(DockerConstant.TIME_MEMORY_MARK)) {
+                    timeAndMemory = line;
+                    log.info("Time and Memory Cost: " + line);
+                } else {
+                    outputLines.add(line);
+                    log.info((frame.getStreamType() == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
+                }
             }
         }
 
         public String getOutputLines() {
             return Arrays.toString(outputLines.toArray(new String[0]));
+        }
+
+        public String getTimeAndMemory() {
+            return timeAndMemory;
         }
     }
 }

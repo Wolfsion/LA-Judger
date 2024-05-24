@@ -1,6 +1,6 @@
 # LA-Judger
 
-## 自定义配置
+## 需要修改的配置
 + nacos服务地址
 + mysql服务地址
 + redis服务地址

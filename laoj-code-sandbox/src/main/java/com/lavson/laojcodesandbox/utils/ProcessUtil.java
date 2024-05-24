@@ -3,6 +3,7 @@ package com.lavson.laojcodesandbox.utils;
 import cn.hutool.core.util.StrUtil;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.enums.ExitCodeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * @version 1.0
  * 2024/5/14 - 20:57
  */
+@Slf4j
 public class ProcessUtil {
 
     /**
@@ -37,7 +39,7 @@ public class ProcessUtil {
             executeMessage.setExitValue(exitValue);
             // 正常退出
             if (exitValue == ExitCodeEnum.SUCCESS.getValue()) {
-                System.out.println(opName + "成功");
+                log.info("Java代码" + opName + "成功");
                 // 分批获取进程的正常输出
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
                 List<String> outputStrList = new ArrayList<>();

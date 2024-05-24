@@ -44,7 +44,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
 
 //        2. 编译代码，得到 class 文件
         ExecuteMessage compileFileExecuteMessage = compileFile(userCodeFile);
-        System.out.println(compileFileExecuteMessage);
+        log.info("java代码编译结果: " + compileFileExecuteMessage);
 
         // 3. 执行代码，得到输出结果
         List<ExecuteMessage> executeMessageList = runFile(userCodeFile, inputList, config);
@@ -158,7 +158,7 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         if (userCodeFile.getParentFile() != null) {
             String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
             boolean del = FileUtil.del(userCodeParentPath);
-            System.out.println("删除" + (del ? "成功" : "失败"));
+            log.info("代码和字节码" + "删除" + (del ? "成功" : "失败"));
             return del;
         }
         return true;
