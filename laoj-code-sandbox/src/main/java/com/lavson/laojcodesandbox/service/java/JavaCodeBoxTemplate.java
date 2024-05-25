@@ -14,6 +14,7 @@ import com.lavson.model.entity.JudgeConfig;
 import com.lavson.model.enums.ExitCodeEnum;
 import com.lavson.model.enums.JudgeResultEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

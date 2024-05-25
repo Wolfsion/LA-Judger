@@ -1,18 +1,23 @@
 package com.lavson.laojcodesandbox.service.java;
 
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.lavson.common.constant.DockerConstant;
-import com.lavson.common.constant.SandBoxConstant;
-import com.lavson.laojcodesandbox.dockerpool.DockerClientPool;
+import com.lavson.laojcodesandbox.config.DockerConfig;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.entity.JudgeConfig;
 import com.lavson.model.enums.JudgeResultEnum;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,10 +35,17 @@ import java.util.regex.Pattern;
  * @version 1.0
  * 2024/5/14 - 20:31
  */
+
+
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class JavaDockerBox extends JavaCodeBoxTemplate{
 
     static final Pattern pattern = Pattern.compile(DockerConstant.TIME_MEMORY_REGEX);
+
+    private final DockerClient dockerClient;
+
     /**
      * 3、创建容器，把文件复制到容器内
      * @param userCodeFile
@@ -45,8 +57,6 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
 
         // todo: pool, parameter: memory_limit
-        // 容器池获取客户端
-        DockerClient dockerClient = DockerClientPool.dockerClient();
 
         // 创建容器
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(DockerConstant.DOCKER_IMAGE_NAME);
@@ -106,7 +116,7 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
                 boolean finishedInTime = dockerClient.execStartCmd(execCreateCmdResponse.getId())
                         .withStdIn(inputStream)
                         .exec(callback)
-                        .awaitCompletion(timeLimit, TimeUnit.SECONDS);
+                        .awaitCompletion(timeLimit, TimeUnit.MILLISECONDS);
 
                 // 打印捕获的输出内容
                 executeMessage.setOutput(callback.getOutputLines());
@@ -142,11 +152,6 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
         // 删除容器
         dockerClient.removeContainerCmd(containerId).exec();
 
-        try {
-            dockerClient.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         // todo: pool
 
         return executeMessageList;

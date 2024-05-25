@@ -7,13 +7,15 @@ import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.lavson.common.constant.DockerConstant;
-import com.lavson.common.constant.SandBoxConstant;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +29,43 @@ import java.util.List;
 @Configuration
 @Slf4j
 public class DockerConfig {
+
+    private static String dockerUrl;
+    private static ApacheDockerHttpClient httpClient;
+
+    @Value("${docker.url}")
+    private String url;
+
+    @PostConstruct
+    public void init() {
+        dockerUrl = url;
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        if (httpClient != null) {
+            try {
+                httpClient.close();
+                log.info("HTTP Client is closed.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Bean
+    public DockerClient dockerClient() {
+        // 创建并配置 DockerClient 对象
+        com.github.dockerjava.core.DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+                .withDockerHost(DockerConstant.DOCKER_TCP + dockerUrl).build();
+        httpClient = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .sslConfig(config.getSSLConfig())
+                .build();
+        return DockerClientBuilder.getInstance(config)
+                .withDockerHttpClient(httpClient)
+                .build();
+    }
 
     @Bean
     public PullImageCmd pullDockerImage(DockerClient dockerClient) {
