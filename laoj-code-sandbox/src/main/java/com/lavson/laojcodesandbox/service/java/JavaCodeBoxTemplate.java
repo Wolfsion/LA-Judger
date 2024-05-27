@@ -117,34 +117,40 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
     public ExecuteCodeResponse getOutputResponse(List<ExecuteMessage> executeMessageList) {
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
         List<String> outputList = new ArrayList<>();
-        ArrayList<JudgeInfo> jis = new ArrayList<>();
+        List<JudgeInfo> jis = new ArrayList<>();
 
         for (ExecuteMessage executeMessage : executeMessageList) {
             JudgeInfo judgeInfo = new JudgeInfo();
 
             String errorMessage = executeMessage.getErrorMessage();
-            if (StrUtil.isNotBlank(errorMessage)) {
+            if (!SandBoxConstant.BLANK_ERROR_MESSAGE.equals(errorMessage)) {
                 executeCodeResponse.setMessage(errorMessage);
                 // 用户提交的代码执行中存在错误
                 executeCodeResponse.setStatus(ExitCodeEnum.UNKNOWN_ERROR.getValue());
                 judgeInfo.setJudge(JudgeResultEnum.RUNTIME_ERROR);
+                jis.add(judgeInfo);
+                if (StrUtil.isNotBlank(executeCodeResponse.getMessage())) {
+                    executeCodeResponse.setMessage(executeMessage.getErrorMessage());
+                }
                 continue;
             }
 
             outputList.add(executeMessage.getOutput());
+
             judgeInfo.setTime(executeMessage.getTime());
             judgeInfo.setMemory(executeMessage.getMemory());
-
             if (ObjectUtil.isNotNull(executeMessage.getJudge())) {
                 judgeInfo.setJudge(executeMessage.getJudge());
             } else {
                 judgeInfo.setJudge(JudgeResultEnum.JUDGING_WAITING);
             }
+
             jis.add(judgeInfo);
         }
+
         // 正常运行完成
         if (outputList.size() == executeMessageList.size()) {
-            executeCodeResponse.setStatus(1);
+            executeCodeResponse.setStatus(ExitCodeEnum.SUCCESS.getValue());
         }
 
         executeCodeResponse.setOutputList(outputList);

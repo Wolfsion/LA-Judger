@@ -7,6 +7,7 @@ import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.lavson.common.constant.DockerConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +60,7 @@ public class DockerConfig {
     @Bean
     public DockerClient dockerClient() {
         // 创建并配置 DockerClient 对象
-        com.github.dockerjava.core.DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(DockerConstant.DOCKER_TCP + dockerUrl).build();
         httpClient = new ApacheDockerHttpClient.Builder()
                 .dockerHost(config.getDockerHost())

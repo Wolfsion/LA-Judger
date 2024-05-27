@@ -14,5 +14,5 @@ public interface SandBoxConstant {
     String GLOBAL_CODE_DIR_NAME = "tmpCode";
     String GLOBAL_JAVA_CLASS_NAME = "Main.java";
     Long DEFAULT_MEMORY_LIMIT = 128*1024L;
-
+    String BLANK_ERROR_MESSAGE = "[]";
 }

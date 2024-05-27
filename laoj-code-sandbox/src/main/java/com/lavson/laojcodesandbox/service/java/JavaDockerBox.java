@@ -52,7 +52,7 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
     @Override
     public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList, JudgeConfig config) {
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
-
+        log.info("Docker Pool:"+dockerClient.hashCode());
         // todo: pool, parameter: memory_limit
 
         // 创建容器
