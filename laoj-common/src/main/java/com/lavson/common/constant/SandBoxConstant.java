@@ -1,5 +1,7 @@
 package com.lavson.common.constant;
 
+import java.io.File;
+
 /**
  * todo
  *
@@ -11,7 +13,7 @@ public interface SandBoxConstant {
     String READ_SUB_DIR = "C:\\code\\laoj-code-sandbox";
     String AUTH_REQUEST_HEADER = "auth";
     String AUTH_REQUEST_SECRET = "secretKey";
-    String GLOBAL_CODE_DIR_NAME = "tmpCode";
+    String GLOBAL_CODE_DIR_NAME = "laoj-code-sandbox" + File.separator + "tmpCode";
     String GLOBAL_JAVA_CLASS_NAME = "Main.java";
     Long DEFAULT_MEMORY_LIMIT = 128*1024L;
     String BLANK_ERROR_MESSAGE = "[]";

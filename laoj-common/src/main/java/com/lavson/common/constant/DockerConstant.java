@@ -16,7 +16,9 @@ public interface DockerConstant {
     Long CPU_COUNT = 1L;
     String DOCKER_MOUNT_DIR = "/app";
     String DOCKER_MOUNT_IO_DIR = "/questionIO";
-    String QUESTION_IS_DIR = System.getProperty("user.dir") + File.separator + "/questionIO";
+    String QUESTION_IS_DIR = System.getProperty("user.dir") + File.separator +
+                                "laoj-code-sandbox" + File.separator +
+                                "/questionIO";
     // "--read-only"
     String[] JAVA_EXECUTE = new String[]{"sh", "-c", "java -Xmx128m -cp /app Main"};
     String TIME_MEMORY_MARK = "_TM_#";
