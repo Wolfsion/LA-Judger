@@ -20,14 +20,9 @@ public class JudgeContext {
 
     private List<JudgeInfo> judgeInfos;
 
-    private List<String> inputList;
-
     private List<String> outputList;
 
-    private List<JudgeCase> judgeCaseList;
+    private List<String> target;
 
-    private Question question;
-
-    private QuestionSubmit questionSubmit;
-
+    private String language;
 }

@@ -25,7 +25,7 @@ public class ExecuteCodeResponse {
     private List<String> outputList;
 
     /**
-     * 接口信息，第一次错误执行信息
+     * 接口信息，留置待用，冗余设计
      */
     private String message;
 

@@ -1,5 +1,6 @@
 package com.lavson.laojjudgeservice.rabbitmq;
 
+import com.lavson.common.constant.RabbitMQConstant;
 import com.lavson.laojjudgeservice.service.JudgeService;
 import com.rabbitmq.client.Channel;
 import lombok.SneakyThrows;
@@ -27,7 +28,7 @@ public class MessageConsumer {
 
     // 指定程序监听的消息队列和确认机制
     @SneakyThrows
-    @RabbitListener(queues = {"code_queue"}, ackMode = "MANUAL")
+    @RabbitListener(queues = {RabbitMQConstant.JUDGE_QUEUE}, ackMode = "MANUAL")
     public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
         log.info("receiveMessage message = {}", message);
         long questionSubmitId = Long.parseLong(message);

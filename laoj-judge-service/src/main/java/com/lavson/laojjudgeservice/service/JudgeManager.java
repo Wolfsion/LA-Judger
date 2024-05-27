@@ -7,6 +7,7 @@ import com.lavson.laojjudgeservice.judge.strategy.JudgeStrategy;
 import com.lavson.model.codesandbox.JudgeInfo;
 import com.lavson.model.entity.QuestionSubmit;
 import com.lavson.model.enums.CodeLanguageEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
  * 2024/5/8 - 16:43
  */
 @Service
+@Slf4j
 public class JudgeManager {
 
     /**
@@ -26,11 +28,12 @@ public class JudgeManager {
      * @return
      */
     public JudgeInfo doJudge(JudgeContext judgeContext) {
-        QuestionSubmit questionSubmit = judgeContext.getQuestionSubmit();
-        String language = questionSubmit.getLanguage();
+        String language = judgeContext.getLanguage();
         JudgeStrategy judgeStrategy = new DefaultJudgeStrategy();
         if (CodeLanguageEnum.JAVA.getText().equals(language)) {
             judgeStrategy = new JavaLanguageJudgeStrategy();
+        } else {
+            log.error("Not support language.");
         }
         return judgeStrategy.doJudge(judgeContext);
     }

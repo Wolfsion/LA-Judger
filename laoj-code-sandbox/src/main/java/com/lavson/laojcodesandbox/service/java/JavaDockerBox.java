@@ -10,10 +10,7 @@ import com.lavson.laojcodesandbox.config.DockerConfig;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.entity.JudgeConfig;
 import com.lavson.model.enums.JudgeResultEnum;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -120,6 +117,7 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
 
                 // 打印捕获的输出内容
                 executeMessage.setOutput(callback.getOutputLines());
+                executeMessage.setErrorMessage(callback.getErrorMessages());
 
                 if (!finishedInTime) {
                     executeMessage.setJudge(JudgeResultEnum.TIME_LIMIT_EXCEEDED);
@@ -176,19 +174,27 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
 
     static class FrameResultCallback extends ResultCallbackTemplate<FrameResultCallback, Frame> {
         private final List<String> outputLines = new ArrayList<>();
+        private final List<String> errorMessages = new ArrayList<>();
+
+        @Getter
         private String timeAndMemory = "";
 
         @Override
         public void onNext(Frame frame) {
-            if (frame.getStreamType() == StreamType.STDOUT || frame.getStreamType() == StreamType.STDERR) {
+            StreamType type = frame.getStreamType();
+            if (type == StreamType.STDOUT || type == StreamType.STDERR) {
                 String line = new String(frame.getPayload()).trim();
 
                 if (line.contains(DockerConstant.TIME_MEMORY_MARK)) {
                     timeAndMemory = line;
                     log.info("Time and Memory Cost: " + line);
                 } else {
-                    outputLines.add(line);
-                    log.info((frame.getStreamType() == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
+                    if (type == StreamType.STDOUT) {
+                        outputLines.add(line);
+                    } else {
+                        errorMessages.add(line);
+                    }
+                    log.info((type == StreamType.STDOUT ? "STDOUT: " : "STDERR: ") + line);
                 }
             }
         }
@@ -196,9 +202,8 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
         public String getOutputLines() {
             return Arrays.toString(outputLines.toArray(new String[0]));
         }
-
-        public String getTimeAndMemory() {
-            return timeAndMemory;
+        public String getErrorMessages() {
+            return Arrays.toString(errorMessages.toArray(new String[0]));
         }
     }
 }

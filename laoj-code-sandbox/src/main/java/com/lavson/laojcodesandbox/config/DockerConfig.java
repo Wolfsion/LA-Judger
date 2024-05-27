@@ -33,6 +33,8 @@ public class DockerConfig {
     private static String dockerUrl;
     private static ApacheDockerHttpClient httpClient;
 
+    private static DockerClient dockerClient;
+
     @Value("${docker.url}")
     private String url;
 
@@ -45,8 +47,9 @@ public class DockerConfig {
     public void cleanup() {
         if (httpClient != null) {
             try {
+                dockerClient.close();
                 httpClient.close();
-                log.info("HTTP Client is closed.");
+                log.info("Docker and http client is closed.");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -62,9 +65,10 @@ public class DockerConfig {
                 .dockerHost(config.getDockerHost())
                 .sslConfig(config.getSSLConfig())
                 .build();
-        return DockerClientBuilder.getInstance(config)
+        dockerClient = DockerClientBuilder.getInstance(config)
                 .withDockerHttpClient(httpClient)
                 .build();
+        return dockerClient;
     }
 
     @Bean

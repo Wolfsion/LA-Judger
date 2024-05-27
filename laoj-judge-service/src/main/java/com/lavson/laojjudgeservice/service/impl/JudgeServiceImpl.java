@@ -14,6 +14,7 @@ import com.lavson.model.codesandbox.ExecuteCodeRequest;
 import com.lavson.model.codesandbox.ExecuteCodeResponse;
 import com.lavson.model.codesandbox.JudgeInfo;
 import com.lavson.model.entity.JudgeCase;
+import com.lavson.model.entity.JudgeConfig;
 import com.lavson.model.entity.Question;
 import com.lavson.model.entity.QuestionSubmit;
 import com.lavson.model.enums.JudgeStatusEnum;
@@ -73,25 +74,26 @@ public class JudgeServiceImpl implements JudgeService {
         codeSandbox = new CodeSandboxProxy(codeSandbox);
         String language = questionSubmit.getLanguage();
         String code = questionSubmit.getCode();
+        String judgeConfigStr = question.getJudgeConfig();
+        JudgeConfig config = JSONUtil.toBean(judgeConfigStr, JudgeConfig.class);
         // 获取输入用例
         String judgeCaseStr = question.getJudgeCase();
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
         List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        List<String> targetList = judgeCaseList.stream().map(JudgeCase::getOutput).collect(Collectors.toList());
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
                 .code(code)
                 .language(language)
                 .inputList(inputList)
+                .config(config)
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
         List<String> outputList = executeCodeResponse.getOutputList();
         // 5）根据沙箱的执行结果，设置题目的判题状态和信息
         JudgeContext judgeContext = new JudgeContext();
         judgeContext.setJudgeInfos(executeCodeResponse.getJudgeInfos());
-        judgeContext.setInputList(inputList);
         judgeContext.setOutputList(outputList);
-        judgeContext.setJudgeCaseList(judgeCaseList);
-        judgeContext.setQuestion(question);
-        judgeContext.setQuestionSubmit(questionSubmit);
+        judgeContext.setTarget(targetList);
         JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
         // 6）修改数据库中的判题结果
         questionSubmitUpdate = new QuestionSubmit();

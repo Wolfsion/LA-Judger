@@ -120,16 +120,18 @@ public abstract class JavaCodeBoxTemplate implements CodeSandbox {
         ArrayList<JudgeInfo> jis = new ArrayList<>();
 
         for (ExecuteMessage executeMessage : executeMessageList) {
+            JudgeInfo judgeInfo = new JudgeInfo();
+
             String errorMessage = executeMessage.getErrorMessage();
             if (StrUtil.isNotBlank(errorMessage)) {
                 executeCodeResponse.setMessage(errorMessage);
                 // 用户提交的代码执行中存在错误
                 executeCodeResponse.setStatus(ExitCodeEnum.UNKNOWN_ERROR.getValue());
-                break;
+                judgeInfo.setJudge(JudgeResultEnum.RUNTIME_ERROR);
+                continue;
             }
-            outputList.add(executeMessage.getOutput());
 
-            JudgeInfo judgeInfo = new JudgeInfo();
+            outputList.add(executeMessage.getOutput());
             judgeInfo.setTime(executeMessage.getTime());
             judgeInfo.setMemory(executeMessage.getMemory());
 

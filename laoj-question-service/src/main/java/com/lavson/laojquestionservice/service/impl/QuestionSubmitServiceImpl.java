@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lavson.common.constant.CommonConstant;
+import com.lavson.common.constant.RabbitMQConstant;
 import com.lavson.common.exception.BusinessException;
 import com.lavson.common.norm.ErrorCode;
 import com.lavson.common.utils.SqlUtil;
@@ -93,7 +94,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         }
         Long questionSubmitId = questionSubmit.getId();
         // 发送消息
-        myMessageProducer.sendMessage("code_exchange", "my_routingKey", String.valueOf(questionSubmitId));
+        myMessageProducer.sendMessage(RabbitMQConstant.JUDGE_EXCHANGE, RabbitMQConstant.JUDGE_ROUTING_KEY, String.valueOf(questionSubmitId));
         // 执行判题服务
 //        CompletableFuture.runAsync(() -> {
 //            judgeFeignClient.doJudge(questionSubmitId);
