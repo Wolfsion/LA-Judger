@@ -2,3 +2,8 @@ server:
   port: 8109
 docker:
   url: localhost:2375
+  pool:
+    initSize: 5
+    maxSize: 20
+    coreSize: 10
+    queueSize: 10

@@ -15,6 +15,8 @@ public interface SandBoxConstant {
     String AUTH_REQUEST_SECRET = "secretKey";
     String GLOBAL_CODE_DIR_NAME = "laoj-code-sandbox" + File.separator + "tmpCode";
     String GLOBAL_JAVA_CLASS_NAME = "Main.java";
+    String GLOBAL_JAVA_MAIN = " Main";
+    Long DEFAULT_TIME_LIMIT = 2000L;
     Long DEFAULT_MEMORY_LIMIT = 128*1024L;
     String BLANK_ERROR_MESSAGE = "[]";
 }

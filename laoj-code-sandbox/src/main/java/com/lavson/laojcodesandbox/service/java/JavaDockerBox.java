@@ -6,7 +6,10 @@ import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.lavson.common.constant.DockerConstant;
+import com.lavson.common.constant.SandBoxConstant;
 import com.lavson.laojcodesandbox.config.DockerConfig;
+import com.lavson.laojcodesandbox.dockerpool.DockerContainerPool;
+import com.lavson.laojcodesandbox.dockerpool.task.Executable;
 import com.lavson.model.codesandbox.ExecuteMessage;
 import com.lavson.model.entity.JudgeConfig;
 import com.lavson.model.enums.JudgeResultEnum;
@@ -42,6 +45,9 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
     static final Pattern pattern = Pattern.compile(DockerConstant.TIME_MEMORY_REGEX);
 
     private final DockerClient dockerClient;
+    private final DockerContainerPool dockerContainerPool;
+
+    private boolean waitingLock = true;
 
     /**
      * 3、创建容器，把文件复制到容器内
@@ -52,107 +58,74 @@ public class JavaDockerBox extends JavaCodeBoxTemplate{
     @Override
     public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList, JudgeConfig config) {
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
-        log.info("Docker Pool:"+dockerClient.hashCode());
-        // todo: pool, parameter: memory_limit
+        String last = new File(userCodeParentPath).getName();
 
-        // 创建容器
-        CreateContainerCmd containerCmd = dockerClient.createContainerCmd(DockerConstant.DOCKER_IMAGE_NAME);
-        HostConfig hostConfig = new HostConfig();
-        hostConfig.withMemory(config.getMemoryLimit() * 1024L);
-        hostConfig.withMemorySwap(DockerConstant.MEMORY_SWAP);
-        hostConfig.withCpuCount(DockerConstant.CPU_COUNT);
-        //hostConfig.withSecurityOpts(Arrays.asList("seccomp=安全管理配置字符串"));
-
-        hostConfig.setBinds(new Bind(userCodeParentPath, new Volume(DockerConstant.DOCKER_MOUNT_DIR))
-        ,new Bind(DockerConstant.QUESTION_IS_DIR, new Volume(DockerConstant.DOCKER_MOUNT_IO_DIR)));
-
-        CreateContainerResponse createContainerResponse = containerCmd
-                .withHostConfig(hostConfig)
-//                .withNetworkDisabled(false)
-                .withAttachStdin(true)
-                .withAttachStderr(true)
-                .withAttachStdout(true)
-                .withTty(true)
-                .exec();
-        log.info(String.valueOf(createContainerResponse));
-        String containerId = createContainerResponse.getId();
-
-        // 启动容器
-        dockerClient.startContainerCmd(containerId).exec();
-        // todo: pool
-
-        // docker exec keen_blackwell java -cp /app Main 1 3
-        // 执行命令并获取结果
         Long timeLimit = config.getTimeLimit();
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
 
-        for (String input : inputList) {
-            ExecuteMessage executeMessage = new ExecuteMessage();
+        // docker exec keen_blackwell java -cp /app Main 1 3
+        // 执行命令并获取结果
+        waitingLock = true;
+        dockerContainerPool.borrow(containerId -> {
+            String[] command = deepCopyStringArray(DockerConstant.TIME_MEMORY_JAVA_EXECUTE);
+            // todo: only in linux
+            command[command.length-1] = command[command.length-1] + "/" +
+                    last + SandBoxConstant.GLOBAL_JAVA_MAIN;
+            for (String input : inputList) {
+                ExecuteMessage executeMessage = new ExecuteMessage();
+                InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+                try {
+                    ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
+                            .withAttachStdin(true)
+                            .withAttachStdout(true)
+                            .withAttachStderr(true)
+                            .withCmd(command)
+                            .exec();
+                    log.info("创建执行命令：" + execCreateCmdResponse);
 
-//            // 本地文件重定向方式
-//            String[] command = ArrayUtil.clone(DockerConstant.JAVA_EXECUTE);
-//            command[command.length-1] = command[command.length-1] + input;
+                    FrameResultCallback callback = new FrameResultCallback();
 
-            InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-            String[] command = DockerConstant.TIME_MEMORY_JAVA_EXECUTE;
-            try {
-                ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
-                        .withAttachStdin(true)
-                        .withAttachStdout(true)
-                        .withAttachStderr(true)
-//                        .withTty(true)
-                        .withCmd(command)
-                        .exec();
-                log.info("创建执行命令：" + execCreateCmdResponse);
+                    boolean finishedInTime = dockerClient.execStartCmd(execCreateCmdResponse.getId())
+                            .withStdIn(inputStream)
+                            .exec(callback)
+                            .awaitCompletion(timeLimit, TimeUnit.MILLISECONDS);
 
-                // 开始计时
-                long startTime = System.nanoTime();
+                    // 打印捕获的输出内容
+                    executeMessage.setOutput(callback.getOutputLines());
+                    executeMessage.setErrorMessage(callback.getErrorMessages());
 
-                FrameResultCallback callback = new FrameResultCallback();
+                    if (!finishedInTime) {
+                        executeMessage.setJudge(JudgeResultEnum.TIME_LIMIT_EXCEEDED);
+                    }
+                    inputStream.close();
+                    Long[] timeAndMemory = parseTimeAndMemory(callback.getTimeAndMemory());
+                    executeMessage.setTime(timeAndMemory[DockerConstant.INDEX_TIME]);
+                    executeMessage.setMemory(timeAndMemory[DockerConstant.INDEX_MEMORY]);
 
-                boolean finishedInTime = dockerClient.execStartCmd(execCreateCmdResponse.getId())
-                        .withStdIn(inputStream)
-                        .exec(callback)
-                        .awaitCompletion(timeLimit, TimeUnit.MILLISECONDS);
-
-                // 打印捕获的输出内容
-                executeMessage.setOutput(callback.getOutputLines());
-                executeMessage.setErrorMessage(callback.getErrorMessages());
-
-                if (!finishedInTime) {
-                    executeMessage.setJudge(JudgeResultEnum.TIME_LIMIT_EXCEEDED);
+                } catch (InterruptedException | IOException e) {
+                    log.info("容器运行时，超时打断任务异常或输入异常");
+                    throw new RuntimeException(e);
                 }
-
-                // 结束计时并计算执行时间
-                long endTime = System.nanoTime();
-                long executionTimeMillis = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-                executeMessage.setTime(executionTimeMillis);
-                inputStream.close();
-
-                Long[] timeAndMemory = parseTimeAndMemory(callback.getTimeAndMemory());
-                executeMessage.setTime(timeAndMemory[DockerConstant.INDEX_TIME]);
-                executeMessage.setMemory(timeAndMemory[DockerConstant.INDEX_MEMORY]);
-
-//                // 获取容器退出状态
-//                Long exitCode = dockerClient.inspectContainerCmd(containerId).exec().getState().getExitCodeLong();
-//                log.info("容器退出状态码: " + exitCode);
-
-            } catch (InterruptedException | IOException e) {
-                log.info("容器运行时，超时打断任务异常或输入异常");
-                throw new RuntimeException(e);
+                executeMessageList.add(executeMessage);
             }
-            executeMessageList.add(executeMessage);
+            waitingLock = false;
+        });
+
+        // todo: optim 自旋锁换阻塞唤醒锁
+        while (waitingLock) {
+
+        }
+        return executeMessageList;
+    }
+    static String[] deepCopyStringArray(String[] array) {
+        if (array == null) {
+            return null;
         }
 
-        // todo: pool
-        // 停止容器
-        dockerClient.stopContainerCmd(containerId).exec();
-        // 删除容器
-        dockerClient.removeContainerCmd(containerId).exec();
+        String[] newArray = new String[array.length];
+        System.arraycopy(array, 0, newArray, 0, array.length);
 
-        // todo: pool
-
-        return executeMessageList;
+        return newArray;
     }
 
     static Long[] parseTimeAndMemory(String line) {

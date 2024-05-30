@@ -15,6 +15,9 @@ public interface DockerConstant {
     Long MEMORY_SWAP = 0L;
     Long CPU_COUNT = 1L;
     String DOCKER_MOUNT_DIR = "/app";
+    String CODE_DIR = System.getProperty("user.dir") + File.separator +
+            "laoj-code-sandbox" + File.separator +
+            "/tmpCode";
     String DOCKER_MOUNT_IO_DIR = "/questionIO";
     String QUESTION_IS_DIR = System.getProperty("user.dir") + File.separator +
                                 "laoj-code-sandbox" + File.separator +
@@ -24,24 +27,11 @@ public interface DockerConstant {
     String TIME_MEMORY_MARK = "_TM_#";
     String[] TIME_MEMORY_JAVA_EXECUTE = new String[]{"sh", "-c", "/usr/bin/time -f " +
                                                 "\"" + TIME_MEMORY_MARK + "%U:%M\" " +
-                                                "java -Xmx128m -cp /app Main"};
+                                                "java -Xmx128m -cp /app"};
     String[] TEST_EXECUTE = new String[]{"echo"};
     String[] TEST_LONG_EXECUTE = new String[]{"sh", "-c", "echo hello && sleep 1"};
     Integer METRIC_LEN = 2;
     Integer INDEX_TIME = 0;
     Integer INDEX_MEMORY = 1;
     String TIME_MEMORY_REGEX = TIME_MEMORY_MARK+"(\\d+\\.\\d+):(\\d+)";
-
-//    String[] REF_CMD = new String[] {
-//            "sh",
-//            "-c",
-//            "echo '"
-//                    + config.getCode()
-//                    + "' > Main.java "
-//                    + "&& echo '"
-//                    + config.getInput()
-//                    + "' > input.in "
-//                    + "&& javac Main.java"
-//                    + " && /usr/bin/time -f \"%U:%X\" -o /home/consume.out java Main < input.in"
-//    };
 }
