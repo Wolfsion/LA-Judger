@@ -1,5 +1,10 @@
 # LA-Judger
   <p align="center">
+    <br>
+    <a href="https://github.com/Wolfsion/LA-Judger"><img src="./logo.png" width="300" alt="LA-Judger"/></a>
+    <br>
+  </p>
+  <p align="center">
     <a href="#">技术选型</a> •
     <a href="#">配置</a> •
     <a href="#">调试</a> 
