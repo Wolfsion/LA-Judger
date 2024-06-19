@@ -1,7 +1,7 @@
-# LA-Judger
+
   <p align="center">
     <br>
-    <a href="https://github.com/Wolfsion/LA-Judger"><img src="./logo.png" width="300" alt="LA-Judger"/></a>
+    <a href="https://github.com/Wolfsion/LA-Judger"><img src="./logo.png" width="500" alt="LA-Judger"/></a>
     <br>
   </p>
   <p align="center">
