@@ -23,16 +23,16 @@ public class TaskWrapper extends Thread {
 
     public void stopContainer() {
         this.running = false;
-        this.dockerContainer.stop();
+        this.dockerContainer.stopContainer();
     }
 
     @Override
     public void run() {
-        this.dockerContainer.start();
+        this.dockerContainer.startContainer();
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                Executable task = executableQueue.poll();
-                task.executeCmd(dockerContainer.getId());
+                Executable exec = executableQueue.poll();
+                exec.executeCmd(dockerContainer.getId());
             } catch (Exception e) {
                 //running = false;
                 log.error("TaskWrapper任务执行异常");

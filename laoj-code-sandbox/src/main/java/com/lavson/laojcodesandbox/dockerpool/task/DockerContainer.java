@@ -7,12 +7,9 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
 import com.lavson.common.constant.DockerConstant;
-import com.lavson.laojcodesandbox.dockerpool.task.Executable;
 import com.lavson.model.entity.JudgeConfig;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * todo
@@ -44,7 +41,7 @@ public class DockerContainer {
         this.executable = executable;
     }
 
-    public void start() {
+    public void startContainer() {
         // 创建容器
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(DockerConstant.DOCKER_IMAGE_NAME);
         HostConfig hostConfig = new HostConfig();
@@ -69,7 +66,7 @@ public class DockerContainer {
         this.id = containerId;
     }
 
-    public void stop() {
+    public void stopContainer() {
         dockerClient.stopContainerCmd(id).exec();
         // 删除容器
         dockerClient.removeContainerCmd(id).exec();

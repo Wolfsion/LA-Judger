@@ -23,7 +23,7 @@ public enum JudgeResultEnum {
     RUNTIME_ERROR("运行错误", "Runtime Error"),
     SYSTEM_ERROR("系统错误", "System Error"),
     OUTPUT_LIMIT_EXCEEDED("输出溢出", "Output Limit Exceeded"),
-    JUDGING_WAITING("等待中", "Waiting"),
+    JUDGING_WAITING("等待校对", "Waiting"),
     DANGEROUS_OPERATION("危险操作", "Dangerous Operation"),
 
     // After Judge

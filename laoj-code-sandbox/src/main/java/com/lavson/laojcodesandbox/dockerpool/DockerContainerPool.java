@@ -12,6 +12,7 @@ import com.lavson.laojcodesandbox.dockerpool.task.TaskWrapper;
 import com.lavson.model.entity.JudgeConfig;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import java.util.stream.IntStream;
  */
 @Slf4j
 @Component
-public class DockerContainerPool extends Thread implements ContainerPool{
+public class DockerContainerPool extends Thread implements ContainerPool {
     private final DockerClient dockerClient;
     private final int initSize;
     private final int maxSize;
@@ -53,14 +54,17 @@ public class DockerContainerPool extends Thread implements ContainerPool{
     private final long keepAliveTime;
     private final TimeUnit timeUnit;
     private final ConcurrentLinkedDeque<TaskWrapper> tasks = new ConcurrentLinkedDeque<>();
+
+    @Setter
     private JudgeConfig config = new JudgeConfig(SandBoxConstant.DEFAULT_TIME_LIMIT,
             SandBoxConstant.DEFAULT_MEMORY_LIMIT, 0L);
     private boolean initialized = false;
+
     @Autowired
     public DockerContainerPool(DockerClient dockerClient,
                                @Value("${docker.pool.initSize:5}") int initSize,
                                @Value("${docker.pool.maxSize:20}") int maxSize,
-                               @Value("${docker.pool.coreSize:10}")int coreSize,
+                               @Value("${docker.pool.coreSize:10}") int coreSize,
                                @Value("${docker.pool.queueSize:10}") int queueSize) {
         this(dockerClient,
                 initSize, maxSize, coreSize, queueSize,
@@ -91,6 +95,7 @@ public class DockerContainerPool extends Thread implements ContainerPool{
             IntStream.range(0, initSize).forEach(i -> add());
             initialized = true;
             log.info("容器池初始化成功.");
+//            this.start();
         }
     }
 
@@ -100,7 +105,7 @@ public class DockerContainerPool extends Thread implements ContainerPool{
         log.info("容器池开始关闭.");
         IntStream.range(0, activeCount).forEach(i -> {
             remove();
-            log.info("已关闭了1个，还有"+activeCount+"个");
+            log.info("已关闭了1个，还有" + activeCount + "个");
         });
         log.info("容器已全部关闭.");
     }
@@ -170,10 +175,6 @@ public class DockerContainerPool extends Thread implements ContainerPool{
         return this.isShutdown;
     }
 
-    public void setConfig(JudgeConfig config) {
-        this.config = config;
-    }
-
     @Override
     public void run() {
         while (!isShutdown && !isInterrupted()) {
@@ -197,7 +198,7 @@ public class DockerContainerPool extends Thread implements ContainerPool{
                 if (executableQueue.size() > 0 && activeCount < maxSize) {
                     IntStream.range(coreSize, maxSize).forEach(i -> add());
                 }
-                if (executableQueue.size() == 0 && activeCount >coreSize) {
+                if (executableQueue.size() == 0 && activeCount > coreSize) {
                     IntStream.range(coreSize, activeCount).forEach(i -> remove());
                 }
             }
